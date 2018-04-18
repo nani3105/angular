@@ -1,6 +1,7 @@
 import {PlatformReflectionCapabilities} from './platform_reflection_capabilities';
 import {global, stringify} from '../util';
 import {Type, isType} from '../type';
+import {ANNOTATIONS, PARAMETERS, PROP_METADATA} from '../util/decorators';
 
 /**
  * Attention: These regex has to hold even if the code is minified!
@@ -16,6 +17,36 @@ export class ReflectionCapabilities implements PlatformReflectionCapabilities {
     constructor(reflect?: any) { this._reflect = reflect || global['Reflect']; }
 
     isReflectionEnabled(): boolean { return true; }
+
+    factory<T>(t: Type<T>): (args: any[]) => T { return (...args: any[]) => new t(...args); }
+
+    /** @internal */
+    _zipTypesAndAnnotations(paramTypes: any[], paramAnnotations: any[]): any[][] {
+        let result: any[][];
+
+        if (typeof paramTypes === 'undefined') {
+            result = new Array(paramAnnotations.length);
+        } else {
+            result = new Array(paramTypes.length);
+        }
+
+        for (let i = 0; i < result.length; i++) {
+            // TS outputs Object for parameters without types, while Traceur omits
+            // the annotations. For now we preserve the Traceur behavior to aid
+            // migration, but this can be revisited.
+            if (typeof paramTypes === 'undefined') {
+                result[i] = [];
+            } else if (paramTypes[i] != Object) {
+                result[i] = [paramTypes[i]];
+            } else {
+                result[i] = [];
+            }
+            if (paramAnnotations && paramAnnotations[i] != null) {
+                result[i] = result[i].concat(paramAnnotations[i]);
+            }
+        }
+        return result;
+    }
 
     parameters(type: Type<any>): any[][] {
         // Note: only report metadata if we have at least one class decorator
@@ -78,6 +109,18 @@ export class ReflectionCapabilities implements PlatformReflectionCapabilities {
         // the content of the constructor above.
         return new Array((<any>type.length)).fill(undefined);
     }
+}
+
+function convertTsickleDecoratorIntoMetadata(decoratorInvocations: any[]): any[] {
+    if (!decoratorInvocations) {
+        return [];
+    }
+    return decoratorInvocations.map(decoratorInvocation => {
+        const decoratorType = decoratorInvocation.type;
+        const annotationCls = decoratorType.annotationCls;
+        const annotationArgs = decoratorInvocation.args ? decoratorInvocation.args : [];
+        return new annotationCls(...annotationArgs);
+    });
 }
 
 function getParentCtor(ctor: Function): Type<any> {
