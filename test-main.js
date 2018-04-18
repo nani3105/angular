@@ -34,38 +34,9 @@ System.config({
             'dist/all/angular2/src/alt_router/router_testing_providers.js'
     },
     packages: {
-        '@angular/core/testing': {main: 'index.js', defaultExtension: 'js'},
+
         '@angular/core': {main: 'index.js', defaultExtension: 'js'},
-        '@angular/animations/browser/testing': {main: 'index.js', defaultExtension: 'js'},
-        '@angular/animations/browser': {main: 'index.js', defaultExtension: 'js'},
-        '@angular/animations/testing': {main: 'index.js', defaultExtension: 'js'},
-        '@angular/animations': {main: 'index.js', defaultExtension: 'js'},
-        '@angular/compiler/testing': {main: 'index.js', defaultExtension: 'js'},
-        '@angular/compiler': {main: 'index.js', defaultExtension: 'js'},
-        '@angular/common/testing': {main: 'index.js', defaultExtension: 'js'},
-        '@angular/common/http/testing': {main: 'index.js', defaultExtension: 'js'},
-        '@angular/common/http': {main: 'index.js', defaultExtension: 'js'},
-        '@angular/common': {main: 'index.js', defaultExtension: 'js'},
-        '@angular/forms': {main: 'index.js', defaultExtension: 'js'},
-        // remove after all tests imports are fixed
-        '@angular/facade': {main: 'index.js', defaultExtension: 'js'},
-        '@angular/router/testing': {main: 'index.js', defaultExtension: 'js'},
-        '@angular/router': {main: 'index.js', defaultExtension: 'js'},
-        '@angular/http/testing': {main: 'index.js', defaultExtension: 'js'},
-        '@angular/http': {main: 'index.js', defaultExtension: 'js'},
-        '@angular/upgrade/static': {main: 'index.js', defaultExtension: 'js'},
-        '@angular/upgrade': {main: 'index.js', defaultExtension: 'js'},
-        '@angular/platform-browser/animations/testing': {main: 'index.js', defaultExtension: 'js'},
-        '@angular/platform-browser/animations': {main: 'index.js', defaultExtension: 'js'},
-        '@angular/platform-browser/testing': {main: 'index.js', defaultExtension: 'js'},
-        '@angular/platform-browser': {main: 'index.js', defaultExtension: 'js'},
-        '@angular/platform-browser-dynamic/testing': {main: 'index.js', defaultExtension: 'js'},
-        '@angular/platform-browser-dynamic': {main: 'index.js', defaultExtension: 'js'},
-        '@angular/platform-server/testing': {main: 'index.js', defaultExtension: 'js'},
-        '@angular/platform-server': {main: 'index.js', defaultExtension: 'js'},
-        '@angular/platform-webworker': {main: 'index.js', defaultExtension: 'js'},
-        '@angular/platform-webworker-dynamic': {main: 'index.js', defaultExtension: 'js'},
-        '@angular/elements': {main: 'index.js', defaultExtension: 'js'},
+
     }
 });
 
@@ -75,28 +46,28 @@ System.config({
 Promise
     .resolve()
 
-    // Load browser-specific polyfills for custom elements.
-    .then(function() { return loadCustomElementsPolyfills(); })
-
-    // Load necessary testing packages.
-    .then(function() {
-        return Promise.all([
-            System.import('@angular/core/testing'),
-            System.import('@angular/platform-browser-dynamic/testing'),
-            System.import('@angular/platform-browser/animations')
-        ]);
-    })
-
-    // Set up the test injector.
-    .then(function(mods) {
-        var coreTesting = mods[0];
-        var pbdTesting = mods[1];
-        var pbAnimations = mods[2];
-
-        coreTesting.TestBed.initTestEnvironment(
-            [pbdTesting.BrowserDynamicTestingModule, pbAnimations.NoopAnimationsModule],
-            pbdTesting.platformBrowserDynamicTesting());
-    })
+    // // Load browser-specific polyfills for custom elements.
+    // .then(function() { return loadCustomElementsPolyfills(); })
+    //
+    // // Load necessary testing packages.
+    // .then(function() {
+    //     return Promise.all([
+    //         System.import('@angular/core/testing'),
+    //         System.import('@angular/platform-browser-dynamic/testing'),
+    //         System.import('@angular/platform-browser/animations')
+    //     ]);
+    // })
+    //
+    // // Set up the test injector.
+    // .then(function(mods) {
+    //     var coreTesting = mods[0];
+    //     var pbdTesting = mods[1];
+    //     var pbAnimations = mods[2];
+    //
+    //     coreTesting.TestBed.initTestEnvironment(
+    //         [pbdTesting.BrowserDynamicTestingModule, pbAnimations.NoopAnimationsModule],
+    //         pbdTesting.platformBrowserDynamicTesting());
+    // })
 
     // Import all the specs and execute their `main()` method.
     .then(function() {

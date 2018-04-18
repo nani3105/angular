@@ -10,6 +10,16 @@
   version "6.0.88"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-6.0.88.tgz#f618f11a944f6a18d92b5c472028728a3e3d4b66"
 
+"@types/source-map@^0.5.1":
+  version "0.5.7"
+  resolved "https://registry.yarnpkg.com/@types/source-map/-/source-map-0.5.7.tgz#165eeb583c1ef00196fe4ef4da5d7832b03b275b"
+  dependencies:
+    source-map "*"
+
+"@types/systemjs@0.19.32":
+  version "0.19.32"
+  resolved "https://registry.yarnpkg.com/@types/systemjs/-/systemjs-0.19.32.tgz#e9204c4cdbc8e275d645c00e6150e68fc5615a24"
+
 "@webcomponents/custom-elements@^1.0.4":
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@webcomponents/custom-elements/-/custom-elements-1.1.0.tgz#bcd5c3605a488ebbddf762f350944afc80bc16dc"
@@ -416,7 +426,7 @@ cookie@0.3.1:
   version "0.3.1"
   resolved "https://registry.yarnpkg.com/cookie/-/cookie-0.3.1.tgz#e7e0a1f9ef43b4c8ba925c5c5a96e806d16873bb"
 
-core-js@^2.1.0:
+core-js@^2.1.0, core-js@^2.4.1:
   version "2.5.5"
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-2.5.5.tgz#b14dde936c640c0579a6b50cabcc132dd6127e3b"
 
@@ -1856,7 +1866,17 @@ socket.io@^1.4.5:
     socket.io-client "1.7.4"
     socket.io-parser "2.3.1"
 
-source-map@^0.5.3:
+source-map-support@0.4.18:
+  version "0.4.18"
+  resolved "https://registry.yarnpkg.com/source-map-support/-/source-map-support-0.4.18.tgz#0286a6de8be42641338594e97ccea75f0a2c585f"
+  dependencies:
+    source-map "^0.5.6"
+
+source-map@*:
+  version "0.7.2"
+  resolved "https://registry.yarnpkg.com/source-map/-/source-map-0.7.2.tgz#115c3e891aaa9a484869fd2b89391a225feba344"
+
+source-map@0.5.7, source-map@^0.5.3, source-map@^0.5.6:
   version "0.5.7"
   resolved "https://registry.yarnpkg.com/source-map/-/source-map-0.5.7.tgz#8a039d2d1021d22d1ea14c80d8ea468ba2ef3fcc"
 
@@ -2169,3 +2189,7 @@ zip-stream@~0.5.0:
     compress-commons "~0.2.0"
     lodash "~3.2.0"
     readable-stream "~1.0.26"
+
+zone.js@^0.8.12:
+  version "0.8.26"
+  resolved "https://registry.yarnpkg.com/zone.js/-/zone.js-0.8.26.tgz#7bdd72f7668c5a7ad6b118148b4ea39c59d08d2d"
