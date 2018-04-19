@@ -21,5 +21,12 @@ class TestObj {
             });
         });
 
+        describe('parameters', () => {
+            it('should return an array of parameters for a type', () => {
+                const p = reflector.parameters(ClassWithDecorators);
+                expect(p).toEqual([[AType, new ParamDecorator('a')], [AType, new ParamDecorator('b')]]);
+              });
+        });
+
     });
 }

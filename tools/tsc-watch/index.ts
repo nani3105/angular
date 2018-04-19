@@ -88,10 +88,10 @@ if (platform == 'node') {
             tsconfig: 'packages/tsconfig.json',
             onStartCmds: [[
                 'node', 'node_modules/karma/bin/karma', 'start', '--no-auto-watch', '--port=9876',
-                'karma-js.conf.js'
+                'karma-js.conf.js' , '--debug'
             ]],
             onChangeCmds: [
-                ['node', 'node_modules/karma/bin/karma', 'run', 'karma-js.conf.js', '--port=9876'],
+                ['node', 'node_modules/karma/bin/karma', 'run', 'karma-js.conf.js', '--port=9876' , '--debug'],
             ]
         },
         BaseConfig));
