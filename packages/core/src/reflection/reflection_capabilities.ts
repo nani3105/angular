@@ -109,6 +109,61 @@ export class ReflectionCapabilities implements PlatformReflectionCapabilities {
         // the content of the constructor above.
         return new Array((<any>type.length)).fill(undefined);
     }
+
+    propMetadata(typeOrFunc: any): {[key: string]: any[]} {
+        if (!isType(typeOrFunc)) {
+          return {};
+        }
+        const parentCtor = getParentCtor(typeOrFunc);
+        const propMetadata: {[key: string]: any[]} = {};
+        if (parentCtor !== Object) {
+          const parentPropMetadata = this.propMetadata(parentCtor);
+          Object.keys(parentPropMetadata).forEach((propName) => {
+            propMetadata[propName] = parentPropMetadata[propName];
+          });
+        }
+        const ownPropMetadata = this._ownPropMetadata(typeOrFunc, parentCtor);
+        if (ownPropMetadata) {
+          Object.keys(ownPropMetadata).forEach((propName) => {
+            const decorators: any[] = [];
+            if (propMetadata.hasOwnProperty(propName)) {
+              decorators.push(...propMetadata[propName]);
+            }
+            decorators.push(...ownPropMetadata[propName]);
+            propMetadata[propName] = decorators;
+          });
+        }
+        return propMetadata;
+    }
+
+    private _ownPropMetadata(typeOrFunc: any, parentCtor: any): {[key: string]: any[]}|null {
+        // Prefer the direct API.
+        if ((<any>typeOrFunc).propMetadata &&
+            (<any>typeOrFunc).propMetadata !== parentCtor.propMetadata) {
+          let propMetadata = (<any>typeOrFunc).propMetadata;
+          if (typeof propMetadata === 'function' && propMetadata.propMetadata) {
+            propMetadata = propMetadata.propMetadata;
+          }
+          return propMetadata;
+        }
+    
+        // API of tsickle for lowering decorators to properties on the class.
+        if ((<any>typeOrFunc).propDecorators &&
+            (<any>typeOrFunc).propDecorators !== parentCtor.propDecorators) {
+          const propDecorators = (<any>typeOrFunc).propDecorators;
+          const propMetadata = <{[key: string]: any[]}>{};
+          Object.keys(propDecorators).forEach(prop => {
+            propMetadata[prop] = convertTsickleDecoratorIntoMetadata(propDecorators[prop]);
+          });
+          return propMetadata;
+        }
+    
+        // API for metadata created by invoking the decorators.
+        if (typeOrFunc.hasOwnProperty(PROP_METADATA)) {
+          return (typeOrFunc as any)[PROP_METADATA];
+        }
+        return null;
+    }
 }
 
 function convertTsickleDecoratorIntoMetadata(decoratorInvocations: any[]): any[] {

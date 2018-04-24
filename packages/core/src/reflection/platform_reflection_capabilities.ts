@@ -10,5 +10,10 @@ export interface PlatformReflectionCapabilities {
      */
     parameters(type: Type<any>): any[][];
 
+    /**
+     * Return a object literal which describes the annotations on Class fields/properties.
+     */
+    propMetadata(typeOrFunc: Type<any>): {[key: string]: any[]};
+
 
 }
