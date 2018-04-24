@@ -3,7 +3,7 @@ import {Console, resolveForwardRef, stringify, syntaxError} from './util';
 import {
     createAttribute,
     createHost, createInject, createInjectionToken, createOptional, createSelf, createSkipSelf, ModuleWithProviders,
-    Provider,
+    Provider, SchemaMetadata,
     Type
 } from './core';
 import {NgModuleResolver} from './ng_module_resolver';
@@ -47,8 +47,15 @@ export class CompileMetadataResolver {
         if (!meta) {
             return null;
         }
-
+        const declaredDirectives: cpl.CompileIdentifierMetadata[] = [];
+        const exportedNonModuleIdentifiers: cpl.CompileIdentifierMetadata[] = [];
+        const declaredPipes: cpl.CompileIdentifierMetadata[] = [];
+        const importedModules: cpl.CompileNgModuleSummary[] = [];
+        const exportedModules: cpl.CompileNgModuleSummary[] = [];
         const providers: cpl.CompileProviderMetadata[] = [];
+        const entryComponents: cpl.CompileEntryComponentMetadata[] = [];
+        const bootstrapComponents: cpl.CompileIdentifierMetadata[] = [];
+        const schemas: SchemaMetadata[] = [];
 
         if (meta.imports) {
             flattenAndDedupeArray(meta.imports).forEach((importedType) => {
@@ -59,7 +66,9 @@ export class CompileMetadataResolver {
                     const moduleWithProviders: ModuleWithProviders = importedType;
                     importedModuleType = moduleWithProviders.ngModule;
                     if (moduleWithProviders.providers) {
-                        providers.push(...this._getProvidersMetadata());
+                        providers.push(...this._getProvidersMetadata(moduleWithProviders.providers, entryComponents,
+                            `provider for the NgModule '${stringifyType(importedModuleType)}'`, [],
+                            importedType));
                     }
                 }
             });

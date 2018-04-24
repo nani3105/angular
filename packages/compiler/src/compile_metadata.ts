@@ -115,6 +115,24 @@ export class ProviderMeta {
     }
 }
 
+// Note: This should only use interfaces as nested data types
+// as we need to be able to serialize this from/to JSON!
+export interface CompileNgModuleSummary extends CompileTypeSummary {
+    type: CompileTypeMetadata;
+
+    // Note: This is transitive over the exported modules.
+    exportedDirectives: CompileIdentifierMetadata[];
+    // Note: This is transitive over the exported modules.
+    exportedPipes: CompileIdentifierMetadata[];
+
+    // Note: This is transitive.
+    entryComponents: CompileEntryComponentMetadata[];
+    // Note: This is transitive.
+    providers: {provider: CompileProviderMetadata, module: CompileIdentifierMetadata}[];
+    // Note: This is transitive.
+    modules: CompileTypeMetadata[];
+}
+
 
 /**
  * Metadata regarding compilation of a module.
