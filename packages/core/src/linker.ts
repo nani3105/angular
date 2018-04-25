@@ -6,13 +6,5 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
-/**
- * @module
- * @description
- * Entry point from which you should import all public core APIs.
- */
-export * from './di';
-
-export {Type} from './type';
-
-export * from './linker';
+// Public API for compiler
+export {CompilerOptions} from './linker/compiler';

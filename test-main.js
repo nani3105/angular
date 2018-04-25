@@ -34,9 +34,9 @@ System.config({
             'dist/all/angular2/src/alt_router/router_testing_providers.js'
     },
     packages: {
-
+        '@angular/core/testing': {main: 'index.js', defaultExtension: 'js'},
         '@angular/core': {main: 'index.js', defaultExtension: 'js'},
-
+        '@angular/compiler': {main: 'index.js', defaultExtension: 'js'}
     }
 });
 

@@ -9,10 +9,8 @@
 /**
  * @module
  * @description
- * Entry point from which you should import all public core APIs.
+ * Entry point for all public APIs of this package.
  */
-export * from './di';
+export * from './src/testing';
 
-export {Type} from './type';
-
-export * from './linker';
+// This file only reexports content of the `src` folder. Keep it that way.

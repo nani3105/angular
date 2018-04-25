@@ -26,7 +26,6 @@
   },
   "exclude": [
     "bazel",
-    "compiler",
     "platform-browser-dynamic",
     "compiler-cli/integrationtest",
     "platform-server/integrationtest",

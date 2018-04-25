@@ -35,45 +35,45 @@ export class CompileMetadataResolver {
         private _errorCollector?: ErrorCollector
     ) {}
 
-    getNgModuleMetadata(
-            moduleType: any, throwIfNotFound = true,
-            alreadyCollecting: Set<any>|null = null): cpl.CompileNgModuleMetadata|null {
-        moduleType = resolveForwardRef(moduleType);
-        let compileMeta = this._ngModuleCache.get(moduleType);
-        if (compileMeta) {
-            return compileMeta;
-        }
-        const meta = this._ngModuleResolver.resolve(moduleType, throwIfNotFound);
-        if (!meta) {
-            return null;
-        }
-        const declaredDirectives: cpl.CompileIdentifierMetadata[] = [];
-        const exportedNonModuleIdentifiers: cpl.CompileIdentifierMetadata[] = [];
-        const declaredPipes: cpl.CompileIdentifierMetadata[] = [];
-        const importedModules: cpl.CompileNgModuleSummary[] = [];
-        const exportedModules: cpl.CompileNgModuleSummary[] = [];
-        const providers: cpl.CompileProviderMetadata[] = [];
-        const entryComponents: cpl.CompileEntryComponentMetadata[] = [];
-        const bootstrapComponents: cpl.CompileIdentifierMetadata[] = [];
-        const schemas: SchemaMetadata[] = [];
+    // getNgModuleMetadata(
+    //         moduleType: any, throwIfNotFound = true,
+    //         alreadyCollecting: Set<any>|null = null): cpl.CompileNgModuleMetadata|null {
+    //     moduleType = resolveForwardRef(moduleType);
+    //     let compileMeta = this._ngModuleCache.get(moduleType);
+    //     if (compileMeta) {
+    //         return compileMeta;
+    //     }
+    //     const meta = this._ngModuleResolver.resolve(moduleType, throwIfNotFound);
+    //     if (!meta) {
+    //         return null;
+    //     }
+    //     const declaredDirectives: cpl.CompileIdentifierMetadata[] = [];
+    //     const exportedNonModuleIdentifiers: cpl.CompileIdentifierMetadata[] = [];
+    //     const declaredPipes: cpl.CompileIdentifierMetadata[] = [];
+    //     const importedModules: cpl.CompileNgModuleSummary[] = [];
+    //     const exportedModules: cpl.CompileNgModuleSummary[] = [];
+    //     const providers: cpl.CompileProviderMetadata[] = [];
+    //     const entryComponents: cpl.CompileEntryComponentMetadata[] = [];
+    //     const bootstrapComponents: cpl.CompileIdentifierMetadata[] = [];
+    //     const schemas: SchemaMetadata[] = [];
 
-        if (meta.imports) {
-            flattenAndDedupeArray(meta.imports).forEach((importedType) => {
-                let importedModuleType: Type = undefined !;
-                if (isValidType(importedType)) {
-                    importedModuleType = importedType;
-                } else if (importedType && importedType.ngModule) {
-                    const moduleWithProviders: ModuleWithProviders = importedType;
-                    importedModuleType = moduleWithProviders.ngModule;
-                    if (moduleWithProviders.providers) {
-                        providers.push(...this._getProvidersMetadata(moduleWithProviders.providers, entryComponents,
-                            `provider for the NgModule '${stringifyType(importedModuleType)}'`, [],
-                            importedType));
-                    }
-                }
-            });
-        }
-    }
+    //     if (meta.imports) {
+    //         flattenAndDedupeArray(meta.imports).forEach((importedType) => {
+    //             let importedModuleType: Type = undefined !;
+    //             if (isValidType(importedType)) {
+    //                 importedModuleType = importedType;
+    //             } else if (importedType && importedType.ngModule) {
+    //                 const moduleWithProviders: ModuleWithProviders = importedType;
+    //                 importedModuleType = moduleWithProviders.ngModule;
+    //                 if (moduleWithProviders.providers) {
+    //                     providers.push(...this._getProvidersMetadata(moduleWithProviders.providers, entryComponents,
+    //                         `provider for the NgModule '${stringifyType(importedModuleType)}'`, [],
+    //                         importedType));
+    //                 }
+    //             }
+    //         });
+    //     }
+    // }
 
     private _getProvidersMetadata(
         providers: Provider[], targetEntryComponents: cpl.CompileEntryComponentMetadata[],
@@ -137,6 +137,7 @@ export class CompileMetadataResolver {
                 this._getInjectableTypeMetadata(provider.useClass, provider.dependencies);
             compileDeps = compileTypeMetadata.diDeps;
         }
+        return {} as cpl.CompileProviderMetadata;
     }
 
     private _getInjectableTypeMetadata(type: Type, dependencies: any[]|null = null):
@@ -146,6 +147,11 @@ export class CompileMetadataResolver {
             return typeSummary.type;
         }
         return this._getTypeMetadata(type, dependencies);
+    }
+
+    private _getEntryComponentsFromProvider(provider: cpl.ProviderMeta, type?: any): 
+        cpl.CompileEntryComponentMetadata[] {
+        return [] ;
     }
 
     private _getTypeMetadata(type: Type, dependencies: any[]|null = null, throwOnUnknownDeps = true):

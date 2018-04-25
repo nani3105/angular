@@ -16,3 +16,4 @@
 export * from './di/metadata';
 
 export {Injector} from './di/injector';
+export {StaticProvider, ValueProvider, ExistingProvider, FactoryProvider, Provider, TypeProvider, ClassProvider} from './di/provider';

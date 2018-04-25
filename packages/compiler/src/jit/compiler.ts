@@ -21,12 +21,13 @@ export class JitCompiler {
         return Promise.resolve(this._compileModuleAndComponents(moduleType, false));
     }
 
-    private _compileModuleAndComponents(moduleType: Type, ieSync: boolean): SyncAsync<object> {
+    private _compileModuleAndComponents(moduleType: Type, isSync: boolean): any {
         return SyncAsync.then(this._loadModules(moduleType, isSync), () => {});
     }
 
     private _loadModules(mainModule: any, isSync: boolean): SyncAsync<any> {
         const loading: Promise<any>[] = [];
-        const mainNgModule = this._metadataResolver.getNgModuleMetadata(mainModule) !;
+        //const mainNgModule = this._metadataResolver.getNgModuleMetadata(mainModule) !;
+        return null;
     }
 }

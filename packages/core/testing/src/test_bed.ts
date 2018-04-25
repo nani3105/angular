@@ -1,4 +1,12 @@
-import {Injector, Type, Pro} from '@angular/core';
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+
+import {Injector, Type, Provider, CompilerOptions} from '@angular/core';
 import {SchemaMetadata} from '@angular/compiler/src/core';
 
 
@@ -36,12 +44,25 @@ export class TestBed implements Injector {
         return TestBed;
     }
 
+    /**
+    * Allows overriding default compiler providers and settings
+    * which are defined in test_injector.js
+    */
+    static configureCompiler(config: {providers?: any[]; useJit?: boolean;}): typeof TestBed {
+        getTestBed().configureCompiler(config);
+        return TestBed;
+    }
+
     private _instantiated: boolean = false;
+
+    private _compilerOptions: CompilerOptions[] = [];
 
     private _providers: Provider[] = [];
     private _declarations: Array<Type<any>|any[]|any> = [];
     private _imports: Array<Type<any>|any[]|any> = [];
     private _schemas: Array<SchemaMetadata|any[]> = [];
+
+    private _aotSummaries: Array<() => any[]> = [];
 
     configureTestingModule(moduleDef: TestModuleMetadata) {
         this._assertNotInstantiated('TestBed.configureTestingModule', 'configure the test module');
@@ -62,6 +83,11 @@ export class TestBed implements Injector {
         }
     }
 
+    configureCompiler(config: {providers?: any[], useJit?: boolean}) {
+        this._assertNotInstantiated('TestBed.configureCompiler', 'configure the compiler');
+        this._compilerOptions.push(config);
+    }
+
     get(token: any, notFoundValue?: any): any {
         return null;
     }
@@ -76,6 +102,33 @@ export class TestBed implements Injector {
 }
 
 let _testBed: TestBed = null !;
+
+/**
+ * Allows injecting dependencies in `beforeEach()` and `it()`.
+ *
+ * Example:
+ *
+ * ```
+ * beforeEach(inject([Dependency, AClass], (dep, object) => {
+ *   // some code that uses `dep` and `object`
+ *   // ...
+ * }));
+ *
+ * it('...', inject([AClass], (object) => {
+ *   object.doSomething();
+ *   expect(...);
+ * })
+ * ```
+ *
+ * Notes:
+ * - inject is currently a function because of some Traceur limitation the syntax should
+ * eventually
+ *   becomes `it('...', @Inject (object: AClass, async: AsyncTestCompleter) => { ... });`
+ *
+ *
+ */
+export function inject(tokens: any[], fn: Function): () => any {
+    const testBed = getTestBed();
 
 /**
  * @experimental

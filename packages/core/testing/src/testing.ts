@@ -9,10 +9,7 @@
 /**
  * @module
  * @description
- * Entry point from which you should import all public core APIs.
+ * Entry point for all public APIs of the core/testing package.
  */
-export * from './di';
 
-export {Type} from './type';
-
-export * from './linker';
+export * from './test_bed';

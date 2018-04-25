@@ -1,3 +1,4 @@
+
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -7,12 +8,10 @@
  */
 
 /**
- * @module
- * @description
- * Entry point from which you should import all public core APIs.
+ * Options for creating a compiler
+ *
+ * @experimental
  */
-export * from './di';
-
-export {Type} from './type';
-
-export * from './linker';
+export type CompilerOptions = {
+    useJit?: boolean,
+};
