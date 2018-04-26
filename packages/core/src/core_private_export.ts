@@ -8,5 +8,7 @@
 export {APP_ROOT as ɵAPP_ROOT} from './di/scope';
 export { stringify as ɵstringify } from './util';
 export {overrideComponentView as ɵoverrideComponentView} from './view/index';
+export {_sanitizeHtml as ɵ_sanitizeHtml} from './sanitization/html_sanitizer';
+export {isObservable as ɵisObservable, isPromise as ɵisPromise} from './util/lang';
 
 

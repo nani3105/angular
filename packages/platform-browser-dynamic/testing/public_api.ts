@@ -6,9 +6,9 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
-import {NgModule, NgZone, PlatformRef, StaticProvider} from '@angular/core';
-
-
-
-export class BrowserTestingModule {
-}
+/**
+ * @module
+ * @description
+ * Entry point for all public APIs of this package.
+ */
+export * from './src/testing';

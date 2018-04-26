@@ -36,6 +36,26 @@ export type TestModuleMetadata = {
 export class TestBed implements Injector {
 
     /**
+     * Initialize the environment for testing with a compiler factory, a PlatformRef, and an
+     * angular module. These are common to every test in the suite.
+     *
+     * This may only be called once, to set up the common providers for the current test
+     * suite on the current platform. If you absolutely need to change the providers,
+     * first use `resetTestEnvironment`.
+     *
+     * Test modules and platforms for individual platforms are available from
+     * '@angular/<platform_name>/testing'.
+     *
+     * @experimental
+     */
+    static initTestEnvironment(
+        ngModule: Type<any>|Type<any>[], platform: PlatformRef, aotSummaries?: () => any[]): TestBed {
+        const testBed = getTestBed();
+        testBed.initTestEnvironment(ngModule, platform, aotSummaries);
+        return testBed;
+    }
+
+    /**
      * Allows overriding default providers, directives, pipes, modules of the test injector,
      * which are defined in test_injector.js
      */
@@ -82,6 +102,31 @@ export class TestBed implements Injector {
     platform: PlatformRef = null !;
   
     ngModule: Type<any>|Type<any>[] = null !;
+
+    /**
+     * Initialize the environment for testing with a compiler factory, a PlatformRef, and an
+     * angular module. These are common to every test in the suite.
+     *
+     * This may only be called once, to set up the common providers for the current test
+     * suite on the current platform. If you absolutely need to change the providers,
+     * first use `resetTestEnvironment`.
+     *
+     * Test modules and platforms for individual platforms are available from
+     * '@angular/<platform_name>/testing'.
+     *
+     * @experimental
+     */
+    initTestEnvironment(
+        ngModule: Type<any>|Type<any>[], platform: PlatformRef, aotSummaries?: () => any[]) {
+        if (this.platform || this.ngModule) {
+            throw new Error('Cannot set base providers because it has already been called');
+        }
+        this.platform = platform;
+        this.ngModule = ngModule;
+        if (aotSummaries) {
+            this._testEnvAotSummaries = aotSummaries;
+        }
+    }
 
     configureTestingModule(moduleDef: TestModuleMetadata) {
         this._assertNotInstantiated('TestBed.configureTestingModule', 'configure the test module');

@@ -21,3 +21,4 @@ export {PlatformRef} from './application_ref';
 export * from './linker';
 export { ApplicationInitStatus} from './application_init';
 export * from './core_private_export';
+export {Sanitizer, SecurityContext} from './sanitization/security';
