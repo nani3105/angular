@@ -1,3 +1,11 @@
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+
 export interface Inject { token: any; }
 export const createInject = makeMetadataFactory<Inject>('Inject', (token: any) => ({token}));
 export const createInjectionToken = makeMetadataFactory<object>(
@@ -29,6 +37,17 @@ export interface SchemaMetadata { name: string; }
 export interface ModuleWithProviders {
     ngModule: Type;
     providers?: Provider[];
+}
+
+export enum ViewEncapsulation {
+  Emulated = 0,
+  Native = 1,
+  None = 2
+}
+
+export enum ChangeDetectionStrategy {
+  OnPush = 0,
+  Default = 1
 }
 
 export type Provider = any;

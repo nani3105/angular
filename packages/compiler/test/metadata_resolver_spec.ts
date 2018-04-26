@@ -9,7 +9,7 @@
 import {TestBed, inject} from '@angular/core/testing';
 import {TEST_COMPILER_PROVIDERS} from './test_bindings';
 import {CompileMetadataResolver} from '../src/metadata_resolver';
-import { Component, Directive, DoCheck, Injectable, NgModule, OnChanges, OnDestroy, OnInit, Pipe, SimpleChanges, ViewEncapsulation, ɵstringify as stringify} from '@angular/core';
+import { Component, Directive, Injectable, ChangeDetectionStrategy, NgModule, Pipe, ViewEncapsulation, ɵstringify as stringify} from '@angular/core';
 
 {
     describe('CompileMetadataResolver', () => {
@@ -30,4 +30,31 @@ import { Component, Directive, DoCheck, Injectable, NgModule, OnChanges, OnDestr
               expect(() => resolver.getPipeMetadata(SomePipe)).toThrowError(/Illegal state/);
         }));
     });
+}
+
+@Component({
+  selector: 'someSelector',
+  inputs: ['someProp'],
+  outputs: ['someEvent'],
+  host: {
+    '[someHostProp]': 'someHostPropExpr',
+    '(someHostListener)': 'someHostListenerExpr',
+    'someHostAttr': 'someHostAttrValue'
+  },
+  exportAs: 'someExportAs',
+  moduleId: 'someModuleId',
+  changeDetection: ChangeDetectionStrategy.Default,
+  template: 'someTemplate',
+  encapsulation: ViewEncapsulation.Emulated,
+  styles: ['someStyle'],
+  interpolation: ['{{', '}}']
+})
+class ComponentWithEverythingInline {
+  ngOnInit(): void {}
+  ngDoCheck(): void {}
+  ngOnDestroy(): void {}
+  ngAfterContentInit(): void {}
+  ngAfterContentChecked(): void {}
+  ngAfterViewInit(): void {}
+  ngAfterViewChecked(): void {}
 }

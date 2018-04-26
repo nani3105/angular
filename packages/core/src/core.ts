@@ -11,8 +11,13 @@
  * @description
  * Entry point from which you should import all public core APIs.
  */
+export * from './metadata';
 export * from './di';
 
+export * from './change_detection';
 export {Type} from './type';
-
+export * from './zone';
+export {PlatformRef} from './application_ref';
 export * from './linker';
+export { ApplicationInitStatus} from './application_init';
+export * from './core_private_export';

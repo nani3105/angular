@@ -15,5 +15,8 @@
 
 export * from './di/metadata';
 
-export {Injector} from './di/injector';
+export {Injectable, InjectableDecorator, InjectableProvider} from './di/injectable';
+export {inject, InjectFlags, INJECTOR, Injector} from './di/injector';
 export {StaticProvider, ValueProvider, ExistingProvider, FactoryProvider, Provider, TypeProvider, ClassProvider} from './di/provider';
+export {InjectionToken} from './di/injection_token';
+

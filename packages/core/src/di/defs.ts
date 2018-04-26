@@ -8,6 +8,8 @@
 
 import {Type} from '../type';
 
+import {ClassProvider, ClassSansProvider, ConstructorProvider, ConstructorSansProvider, ExistingProvider, ExistingSansProvider, FactoryProvider, FactorySansProvider, StaticClassProvider, StaticClassSansProvider, ValueProvider, ValueSansProvider} from './provider';
+
 /**
  * Information about how a type or `InjectionToken` interfaces with the DI system.
  *
@@ -21,25 +23,61 @@ import {Type} from '../type';
  * NOTE: This is a private type and should not be exported
  */
 export interface InjectableDef<T> {
-    /**
-     * Specifies that the given type belongs to a particular injector:
-     * - `InjectorType` such as `NgModule`,
-     * - `'root'` the root injector
-     * - `'any'` all injectors.
-     * - `null`, does not belong to any injector. Must be explicitly listed in the injector
-     *   `providers`.
-     */
-    providedIn: InjectorType<any>|'root'|'any'|null;
+  /**
+   * Specifies that the given type belongs to a particular injector:
+   * - `InjectorType` such as `NgModule`,
+   * - `'root'` the root injector
+   * - `'any'` all injectors.
+   * - `null`, does not belong to any injector. Must be explicitly listed in the injector
+   *   `providers`.
+   */
+  providedIn: InjectorType<any>|'root'|'any'|null;
 
-    /**
-     * Factory method to execute to create an instance of the injectable.
-     */
-    factory: () => T;
+  /**
+   * Factory method to execute to create an instance of the injectable.
+   */
+  factory: () => T;
 
-    /**
-     * In a case of no explicit injector, a location where the instance of the injectable is stored.
-     */
-    value: T|undefined;
+  /**
+   * In a case of no explicit injector, a location where the instance of the injectable is stored.
+   */
+  value: T|undefined;
+}
+
+/**
+ * Information about the providers to be included in an `Injector` as well as how the given type
+ * which carries the information should be created by the DI system.
+ *
+ * An `InjectorDef` can import other types which have `InjectorDefs`, forming a deep nested
+ * structure of providers with a defined priority (identically to how `NgModule`s also have
+ * an import/dependency structure).
+ *
+ * NOTE: This is a private type and should not be exported
+ */
+export interface InjectorDef<T> {
+  factory: () => T;
+
+  // TODO(alxhub): Narrow down the type here once decorators properly change the return type of the
+  // class they are decorating (to add the ngInjectableDef property for example).
+  providers: (Type<any>|ValueProvider|ExistingProvider|FactoryProvider|ConstructorProvider|
+              StaticClassProvider|ClassProvider|any[])[];
+
+  imports: (InjectorType<any>|InjectorTypeWithProviders<any>)[];
+}
+
+/**
+ * A `Type` which has an `InjectableDef` static field.
+ *
+ * `InjectableDefType`s contain their own Dependency Injection metadata and are usable in an
+ * `InjectorDef`-based `StaticInjector.
+ *
+ * @experimental
+ */
+export interface InjectableType<T> extends Type<T> {
+  /**
+   * Opaque type whose structure is highly version dependent. Do not rely on any properties.
+   */
+  ngInjectableDef: never;
 }
 
 /**
@@ -50,11 +88,26 @@ export interface InjectableDef<T> {
  * @experimental
  */
 export interface InjectorType<T> extends Type<T> {
-    /**
-     * Opaque type whose structure is highly version dependent. Do not rely on any properties.
-     */
-    ngInjectorDef: never;
+  /**
+   * Opaque type whose structure is highly version dependent. Do not rely on any properties.
+   */
+  ngInjectorDef: never;
 }
+
+/**
+ * Describes the `InjectorDef` equivalent of a `ModuleWithProviders`, an `InjectorDefType` with an
+ * associated array of providers.
+ *
+ * Objects of this type can be listed in the imports section of an `InjectorDef`.
+ *
+ * NOTE: This is a private type and should not be exported
+ */
+export interface InjectorTypeWithProviders<T> {
+  ngModule: InjectorType<T>;
+  providers?: (Type<any>|ValueProvider|ExistingProvider|FactoryProvider|ConstructorProvider|
+               StaticClassProvider|ClassProvider|any[])[];
+}
+
 
 /**
  * Construct an `InjectableDef` which defines how a token will be constructed by the DI system, and
@@ -73,10 +126,37 @@ export interface InjectorType<T> extends Type<T> {
  * @experimental
  */
 export function defineInjectable<T>(opts: {
-    providedIn?: Type<any>| 'root' | 'any' | null,
-    factory: () => T,
+  providedIn?: Type<any>| 'root' | 'any' | null,
+  factory: () => T,
 }): never {
-    return ({
-        providedIn: opts.providedIn as any || null, factory: opts.factory, value: undefined,
-    } as InjectableDef<T>) as never;
+  return ({
+    providedIn: opts.providedIn as any || null, factory: opts.factory, value: undefined,
+  } as InjectableDef<T>) as never;
+}
+
+/**
+ * Construct an `InjectorDef` which configures an injector.
+ *
+ * This should be assigned to a static `ngInjectorDef` field on a type, which will then be an
+ * `InjectorType`.
+ *
+ * Options:
+ *
+ * * `factory`: an `InjectorType` is an instantiable type, so a zero argument `factory` function to
+ *   create the type must be provided. If that factory function needs to inject arguments, it can
+ *   use the `inject` function.
+ * * `providers`: an optional array of providers to add to the injector. Each provider must
+ *   either have a factory or point to a type which has an `ngInjectableDef` static property (the
+ *   type must be an `InjectableType`).
+ * * `imports`: an optional array of imports of other `InjectorType`s or `InjectorTypeWithModule`s
+ *   whose providers will also be added to the injector. Locally provided types will override
+ *   providers from imports.
+ *
+ * @experimental
+ */
+export function defineInjector(options: {factory: () => any, providers?: any[], imports?: any[]}):
+    never {
+  return ({
+    factory: options.factory, providers: options.providers || [], imports: options.imports || [],
+  } as InjectorDef<any>) as never;
 }

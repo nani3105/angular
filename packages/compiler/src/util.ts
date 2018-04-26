@@ -1,4 +1,22 @@
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+
 import {ParseError} from './parse_util';
+
+export function splitAtColon(input: string, defaultValues: string[]): string[] {
+  return _splitAt(input, ':', defaultValues);
+}
+
+function _splitAt(input: string, character: string, defaultValues: string[]): string[] {
+  const characterIndex = input.indexOf(character);
+  if (characterIndex == -1) return defaultValues;
+  return [input.slice(0, characterIndex).trim(), input.slice(characterIndex + 1).trim()];
+}
 
 export type SyncAsync<T> = T | Promise<T>;
 

@@ -12,6 +12,7 @@ import {InjectionToken} from './injection_token';
 import {resolveForwardRef} from './forward_ref';
 import {ConstructorProvider, ExistingProvider, FactoryProvider, StaticClassProvider, StaticProvider, ValueProvider} from './provider';
 import {Inject, Optional, Self, SkipSelf} from './metadata';
+import {InjectableDef, defineInjectable} from './defs';
 
 export const SOURCE = '__source';
 const _THROW_IF_NOT_FOUND = new Object();
@@ -391,6 +392,45 @@ function getClosureSafeProperty<T>(objWithPropertyToExtract: T): string {
 
 function staticError(text: string, obj: any): Error {
     return new Error(formatError(text, obj));
+}
+
+/**
+ * Current injector value used by `inject`.
+ * - `undefined`: it is an error to call `inject`
+ * - `null`: `inject` can be called but there is no injector (limp-mode).
+ * - Injector instance: Use the injector for resolution.
+ */
+let _currentInjector: Injector|undefined|null = undefined;
+
+/**
+ * Injects a token from the currently active injector.
+ *
+ * This function must be used in the context of a factory function such as one defined for an
+ * `InjectionToken`, and will throw an error if not called from such a context. For example:
+ *
+ * {@example core/di/ts/injector_spec.ts region='ShakeableInjectionToken'}
+ *
+ * Within such a factory function `inject` is utilized to request injection of a dependency, instead
+ * of providing an additional array of dependencies as was common to do with `useFactory` providers.
+ * `inject` is faster and more type-safe.
+ *
+ * @experimental
+ */
+export function inject<T>(token: Type<T>| InjectionToken<T>): T;
+export function inject<T>(token: Type<T>| InjectionToken<T>, flags?: InjectFlags): T|null;
+export function inject<T>(token: Type<T>| InjectionToken<T>, flags = InjectFlags.Default): T|null {
+  if (_currentInjector === undefined) {
+    throw new Error(`inject() must be called from an injection context`);
+  } else if (_currentInjector === null) {
+    const injectableDef: InjectableDef<T> = (token as any).ngInjectableDef;
+    if (injectableDef && injectableDef.providedIn == 'root') {
+      return injectableDef.value === undefined ? injectableDef.value = injectableDef.factory() :
+                                                 injectableDef.value;
+    }
+    throw new Error(`Injector: NOT_FOUND [${stringify(token)}]`);
+  } else {
+    return _currentInjector.get(token, flags & InjectFlags.Optional ? null : undefined, flags);
+  }
 }
 
 

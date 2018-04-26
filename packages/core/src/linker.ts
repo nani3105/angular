@@ -7,4 +7,6 @@
  */
 
 // Public API for compiler
-export {CompilerOptions} from './linker/compiler';
+export {COMPILER_OPTIONS, Compiler, CompilerFactory, CompilerOptions, ModuleWithComponentFactories} from './linker/compiler';
+export {ComponentFactory, ComponentRef} from './linker/component_factory';
+export {NgModuleFactory, NgModuleRef} from './linker/ng_module_factory';

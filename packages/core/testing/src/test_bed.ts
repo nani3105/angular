@@ -6,11 +6,11 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
-import {Injector, Type, Provider, CompilerOptions} from '@angular/core';
-import {SchemaMetadata} from '@angular/compiler/src/core';
-
-
-
+import {ApplicationInitStatus, Injector, Type, Provider, CompilerOptions, Component, Directive, StaticProvider, SchemaMetadata, NgModuleFactory, NgZone, NgModuleRef, NgModule, Pipe, PlatformRef, ɵAPP_ROOT as APP_ROOT, ɵoverrideComponentView as overrideComponentView, ɵstringify as stringify} from '@angular/core';
+import {AsyncTestCompleter} from './async_test_completer';
+import {ComponentFixture} from './component_fixture';
+import {MetadataOverride} from './metadata_override';
+import {TestingCompiler, TestingCompilerFactory} from './test_compiler';
 
 /**
  * @experimental
@@ -55,14 +55,33 @@ export class TestBed implements Injector {
 
     private _instantiated: boolean = false;
 
+    private _compiler: TestingCompiler = null !;
+    private _moduleRef: NgModuleRef<any> = null !;
+    private _moduleFactory: NgModuleFactory<any> = null !;
+  
     private _compilerOptions: CompilerOptions[] = [];
-
+  
+    private _moduleOverrides: [Type<any>, MetadataOverride<NgModule>][] = [];
+    private _componentOverrides: [Type<any>, MetadataOverride<Component>][] = [];
+    private _directiveOverrides: [Type<any>, MetadataOverride<Directive>][] = [];
+    private _pipeOverrides: [Type<any>, MetadataOverride<Pipe>][] = [];
+  
     private _providers: Provider[] = [];
     private _declarations: Array<Type<any>|any[]|any> = [];
     private _imports: Array<Type<any>|any[]|any> = [];
     private _schemas: Array<SchemaMetadata|any[]> = [];
-
+    private _activeFixtures: ComponentFixture<any>[] = [];
+  
+    private _testEnvAotSummaries: () => any[] = () => [];
     private _aotSummaries: Array<() => any[]> = [];
+    private _templateOverrides: Array<{component: Type<any>, templateOf: Type<any>}> = [];
+  
+    private _isRoot: boolean = true;
+    private _rootProviderOverrides: Provider[] = [];
+  
+    platform: PlatformRef = null !;
+  
+    ngModule: Type<any>|Type<any>[] = null !;
 
     configureTestingModule(moduleDef: TestModuleMetadata) {
         this._assertNotInstantiated('TestBed.configureTestingModule', 'configure the test module');
@@ -87,6 +106,105 @@ export class TestBed implements Injector {
         this._assertNotInstantiated('TestBed.configureCompiler', 'configure the compiler');
         this._compilerOptions.push(config);
     }
+
+    execute(tokens: any[], fn: Function, context?: any): any {
+        this._initIfNeeded();
+        const params = tokens.map(t => this.get(t));
+        return fn.apply(context, params);
+    }
+
+    private _createCompilerAndModule(): Type<any> {
+        const providers = this._providers.concat([{provide: TestBed, useValue: this}]);
+        const declarations =
+            [...this._declarations, ...this._templateOverrides.map(entry => entry.templateOf)];
+        
+        const rootScopeImports = [];
+        const rootProviderOverrides = this._rootProviderOverrides;
+        if (this._isRoot) {
+            @NgModule({
+              providers: [
+                ...rootProviderOverrides,
+              ],
+            })
+            class RootScopeModule {
+            }
+            rootScopeImports.push(RootScopeModule);
+        }
+        providers.push({provide: APP_ROOT, useValue: this._isRoot});
+      
+        const imports = [rootScopeImports, this.ngModule, this._imports];
+        const schemas = this._schemas;
+      
+        @NgModule({providers, declarations, imports, schemas})
+        class DynamicTestModule {
+        }
+        const compilerFactory: TestingCompilerFactory =
+            this.platform.injector.get(TestingCompilerFactory);
+        this._compiler = compilerFactory.createTestingCompiler(this._compilerOptions);
+        for (const summary of [this._testEnvAotSummaries, ...this._aotSummaries]) {
+          this._compiler.loadAotSummaries(summary);
+        }
+        this._moduleOverrides.forEach((entry) => this._compiler.overrideModule(entry[0], entry[1]));
+        this._componentOverrides.forEach(
+            (entry) => this._compiler.overrideComponent(entry[0], entry[1]));
+        this._directiveOverrides.forEach(
+            (entry) => this._compiler.overrideDirective(entry[0], entry[1]));
+        this._pipeOverrides.forEach((entry) => this._compiler.overridePipe(entry[0], entry[1]));
+        return DynamicTestModule;
+    }
+
+    compileComponents(): Promise<any> {
+        if (this._moduleFactory || this._instantiated) {
+          return Promise.resolve(null);
+        }
+    
+        const moduleType = this._createCompilerAndModule();
+        return this._compiler.compileModuleAndAllComponentsAsync(moduleType)
+            .then((moduleAndComponentFactories) => {
+              this._moduleFactory = moduleAndComponentFactories.ngModuleFactory;
+            });
+    }
+
+    private _initIfNeeded() {
+        if (this._instantiated) {
+          return;
+        }
+        if (!this._moduleFactory) {
+          try {
+            const moduleType = this._createCompilerAndModule();
+            this._moduleFactory =
+                this._compiler.compileModuleAndAllComponentsSync(moduleType).ngModuleFactory;
+          } catch (e) {
+            const errorCompType = this._compiler.getComponentFromError(e);
+            if (errorCompType) {
+              throw new Error(
+                  `This test module uses the component ${stringify(errorCompType)} which is using a "templateUrl" or "styleUrls", but they were never compiled. ` +
+                  `Please call "TestBed.compileComponents" before your test.`);
+            } else {
+              throw e;
+            }
+          }
+        }
+        for (const {component, templateOf} of this._templateOverrides) {
+          const compFactory = this._compiler.getComponentFactory(templateOf);
+          overrideComponentView(component, compFactory);
+        }
+    
+        const ngZone = new NgZone({enableLongStackTrace: true});
+        const providers: StaticProvider[] = [{provide: NgZone, useValue: ngZone}];
+        const ngZoneInjector = Injector.create({
+          providers: providers,
+          parent: this.platform.injector,
+          name: this._moduleFactory.moduleType.name
+        });
+        this._moduleRef = this._moduleFactory.create(ngZoneInjector);
+        // ApplicationInitStatus.runInitializers() is marked @internal to core. So casting to any
+        // before accessing it.
+        (this._moduleRef.injector.get(ApplicationInitStatus) as any).runInitializers();
+        this._instantiated = true;
+    }
+    
+    
 
     get(token: any, notFoundValue?: any): any {
         return null;
@@ -129,6 +247,22 @@ let _testBed: TestBed = null !;
  */
 export function inject(tokens: any[], fn: Function): () => any {
     const testBed = getTestBed();
+    if (tokens.indexOf(AsyncTestCompleter) >= 0) {
+      // Not using an arrow function to preserve context passed from call site
+      return function() {
+        // Return an async test method that returns a Promise if AsyncTestCompleter is one of
+        // the injected tokens.
+        return testBed.compileComponents().then(() => {
+          const completer: AsyncTestCompleter = testBed.get(AsyncTestCompleter);
+          testBed.execute(tokens, fn, this);
+          return completer.promise;
+        });
+      };
+    } else {
+      // Not using an arrow function to preserve context passed from call site
+      return function() { return testBed.execute(tokens, fn, this); };
+    }
+}
 
 /**
  * @experimental

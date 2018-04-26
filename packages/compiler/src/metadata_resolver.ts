@@ -1,3 +1,10 @@
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 import * as cpl from './compile_metadata';
 import {Console, resolveForwardRef, stringify, syntaxError} from './util';
 import {
@@ -25,6 +32,8 @@ export type ErrorCollector = (error: any, type?: any) => void;
 //   to wait correctly.
 export class CompileMetadataResolver {
 
+    private _directiveCache = new Map<Type, cpl.CompileDirectiveMetadata>();
+    private _pipeCache = new Map<Type, cpl.CompilePipeMetadata>();
     private _summaryCache = new Map<Type, cpl.CompileTypeSummary|null>();
     private _ngModuleCache = new Map<Type, cpl.CompileNgModuleMetadata>();
 
@@ -125,6 +134,39 @@ export class CompileMetadataResolver {
         });
         return compileProviders;
     }
+
+    /**
+     * Gets the metadata for the given directive.
+     * This assumes `loadNgModuleDirectiveAndPipeMetadata` has been called
+     * first.
+     */
+    getDirectiveMetadata(directiveType: any): cpl.CompileDirectiveMetadata {
+      const dirMeta = this._directiveCache.get(directiveType)!;
+      if (!dirMeta) {
+        this._reportError(
+            syntaxError(
+                `Illegal state: getDirectiveMetadata can only be called after loadNgModuleDirectiveAndPipeMetadata for a module that declares it. Directive ${stringifyType(directiveType)}.`),
+            directiveType);
+      }
+      return dirMeta;
+    }
+
+    /**
+     * Gets the metadata for the given pipe.
+     * This assumes `loadNgModuleDirectiveAndPipeMetadata` has been called
+     * first.
+     */
+    getPipeMetadata(pipeType: any): cpl.CompilePipeMetadata|null {
+      const pipeMeta = this._pipeCache.get(pipeType);
+      if (!pipeMeta) {
+        this._reportError(
+            syntaxError(
+                `Illegal state: getPipeMetadata can only be called after loadNgModuleDirectiveAndPipeMetadata for a module that declares it. Pipe ${stringifyType(pipeType)}.`),
+            pipeType);
+      }
+      return pipeMeta || null;
+    }
+
 
     getProviderMetadata(provider: cpl.ProviderMeta): cpl.CompileProviderMetadata {
         let compileDeps: cpl.CompileDiDependencyMetadata[] = undefined !;
