@@ -6,10 +6,17 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
-import {Compiler, CompilerFactory, CompilerOptions, ViewEncapsulation, MissingTranslationStrategy, Injector, StaticProvider} from '@angular/core';
-import {CompileReflector} from '@angular/compiler';
+import {Compiler, CompilerFactory, CompilerOptions, ViewEncapsulation, isDevMode, MissingTranslationStrategy, Injector, StaticProvider, ɵConsole as Console} from '@angular/core';
+import {CompileReflector, CompilerConfig, ResourceLoader, JitSummaryResolver, SummaryResolver, Lexer, Parser} from '@angular/compiler';
 
 import {JitReflector} from './compiler_reflector';
+
+const _NO_RESOURCE_LOADER: ResourceLoader = {
+    get(url: string): Promise<string>{
+        throw new Error(
+            `No ResourceLoader implementation has been provided. Can't read the url "${url}"`);}
+};
+
 
 /**
  * A set of providers that provide `JitCompiler` and its dependencies to use for
@@ -17,6 +24,12 @@ import {JitReflector} from './compiler_reflector';
  */
 export const COMPILER_PROVIDERS = <StaticProvider[]>[
     {provide: CompileReflector, useValue: new JitReflector()},
+    {provide: ResourceLoader, useValue: _NO_RESOURCE_LOADER},
+    {provide: JitSummaryResolver, deps: []},
+    {provide: SummaryResolver, useExisting: JitSummaryResolver},
+    {provide: Console, deps: []},
+    {provide: Lexer, deps: []},
+    {provide: Parser, deps: [Lexer]},
 ];
 
 /**
@@ -24,7 +37,7 @@ export const COMPILER_PROVIDERS = <StaticProvider[]>[
  */
 export class JitCompilerFactory implements CompilerFactory {
     private _defaultOptions: CompilerOptions[];
-  
+
     /* @internal */
     constructor(defaultOptions: CompilerOptions[]) {
         const compilerOptions: CompilerOptions = {
@@ -32,14 +45,35 @@ export class JitCompilerFactory implements CompilerFactory {
             defaultEncapsulation: ViewEncapsulation.Emulated,
             missingTranslation: MissingTranslationStrategy.Warning,
         };
+
         this._defaultOptions = [compilerOptions, ...defaultOptions];
-        createCompiler(options: CompilerOptions[] = []): Compiler {
-            const opts = _mergeOptions(this._defaultOptions.concat(options));
-            const injector = Injector.create([
-                COMPILER_PROVIDERS
-            ]);
-        }
     }
+
+    createCompiler(options: CompilerOptions[] = []): Compiler {
+        const opts = _mergeOptions(this._defaultOptions.concat(options));
+        const injector = Injector.create([
+            COMPILER_PROVIDERS, {
+                provide: CompilerConfig,
+                useFactory: () => {
+                    return new CompilerConfig({
+                        // let explicit values from the compiler options overwrite options
+                        // from the app providers
+                        useJit: opts.useJit,
+                        jitDevMode: isDevMode(),
+                        // let explicit values from the compiler options overwrite options
+                        // from the app providers
+                        defaultEncapsulation: opts.defaultEncapsulation,
+                        missingTranslation: opts.missingTranslation,
+                        preserveWhitespaces: opts.preserveWhitespaces,
+                    });
+                },
+                deps: []
+            },
+            opts.providers !
+        ]);
+        return injector.get(Compiler);
+    }
+
 }  
 
 function _mergeOptions(optionsArr: CompilerOptions[]): CompilerOptions {

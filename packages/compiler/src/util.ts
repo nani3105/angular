@@ -25,6 +25,10 @@ export const SyncAsync = {
             SyncAsync<R> => {return isPromise(value) ? value.then(cb): cb(value); }
 };
 
+export function noUndefined<T>(val: T | undefined): T {
+    return val === undefined ? null ! : val;
+}
+
 /**
  * Determine if the argument is shaped like a Promise
  */

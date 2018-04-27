@@ -22,6 +22,13 @@
  * </div>
  */
 
-import * as core from './core';
+export {CompilerConfig, preserveWhitespacesDefault} from './config';
 
+export * from './resource_loader';
+import * as core from './core';
+export * from './compile_reflector';
+export {ExternalReference} from './output/output_ast';
+export { syntaxError} from './util';
+export * from './summary_resolver';
 export {core};
+export * from './url_resolver';

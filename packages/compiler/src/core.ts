@@ -39,15 +39,51 @@ export interface ModuleWithProviders {
     providers?: Provider[];
 }
 
+export interface Directive {
+    selector?: string;
+    inputs?: string[];
+    outputs?: string[];
+    host?: {[key: string]: string};
+    providers?: Provider[];
+    exportAs?: string;
+    queries?: {[key: string]: any};
+    guards?: {[key: string]: any};
+}
+export const createDirective =
+    makeMetadataFactory<Directive>('Directive', (dir: Directive = {}) => dir);
+
+export interface Component extends Directive {
+    changeDetection?: ChangeDetectionStrategy;
+    viewProviders?: Provider[];
+    moduleId?: string;
+    templateUrl?: string;
+    template?: string;
+    styleUrls?: string[];
+    styles?: string[];
+    animations?: any[];
+    encapsulation?: ViewEncapsulation;
+    interpolation?: [string, string];
+    entryComponents?: Array<Type|any[]>;
+    preserveWhitespaces?: boolean;
+}
 export enum ViewEncapsulation {
-  Emulated = 0,
-  Native = 1,
-  None = 2
+    Emulated = 0,
+    Native = 1,
+    None = 2
 }
 
 export enum ChangeDetectionStrategy {
-  OnPush = 0,
-  Default = 1
+    OnPush = 0,
+    Default = 1
+}
+
+export const createComponent = makeMetadataFactory<Component>(
+    'Component', (c: Component = {}) => ({changeDetection: ChangeDetectionStrategy.Default, ...c}));
+
+export enum MissingTranslationStrategy {
+    Error = 0,
+    Warning = 1,
+    Ignore = 2,
 }
 
 export type Provider = any;

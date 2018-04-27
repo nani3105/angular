@@ -1,3 +1,12 @@
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+
+import {Component} from './core';
 import * as o from './output/output_ast';
 
 /**
@@ -11,5 +20,6 @@ export abstract class CompileReflector {
     abstract propMetadata(typeOrFunc: /*Type*/ any): {[key: string]: any[]};
     abstract hasLifecycleHook(type: any, lcProperty: string): boolean;
     abstract guards(typeOrFunc: /* Type */ any): {[key: string]: any};
+    abstract componentModuleUrl(type: /*Type*/ any, cmpMetadata: Component): string;
     abstract resolveExternalReference(ref: o.ExternalReference): any;
 }
