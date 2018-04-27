@@ -13,6 +13,15 @@ import {MetadataOverride} from './metadata_override';
 import {TestingCompiler, TestingCompilerFactory} from './test_compiler';
 
 /**
+ * An abstract class for inserting the root test component element in a platform independent way.
+ *
+ * @experimental
+ */
+export class TestComponentRenderer {
+  insertRootElement(rootElementId: string) {}
+}
+
+/**
  * @experimental
  */
 export type TestModuleMetadata = {

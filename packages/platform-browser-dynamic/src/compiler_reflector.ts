@@ -2,4 +2,5 @@ import {CompileReflector, ExternalReference, Identifiers, getUrlScheme, syntaxEr
 
 export class JitReflector implements CompileReflector {
     private reflectionCapabilities: ReflectionCapabilities;
+    constructor() { this.reflectionCapabilities = new ReflectionCapabilities(); }
 }
