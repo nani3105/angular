@@ -13,3 +13,5 @@
  */
 
 export * from './test_bed';
+export * from './metadata_override';
+export * from './private_export_testing';

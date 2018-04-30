@@ -11,3 +11,5 @@ import {ParseError} from '../parse_util';
 export class ParseTreeResult {
   constructor(public rootNodes: html.Node[], public errors: ParseError[]) {}
 }
+
+export class Parser {}

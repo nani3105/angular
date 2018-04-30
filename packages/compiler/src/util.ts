@@ -21,8 +21,17 @@ function _splitAt(input: string, character: string, defaultValues: string[]): st
 export type SyncAsync<T> = T | Promise<T>;
 
 export const SyncAsync = {
-    then: <T, R>(value: SyncAsync<T>, cb: (value: T) => R | Promise<R> | SyncAsync<R>):
-            SyncAsync<R> => {return isPromise(value) ? value.then(cb): cb(value); }
+  assertSync: <T>(value: SyncAsync<T>): T => {
+    if (isPromise(value)) {
+      throw new Error(`Illegal state: value cannot be a promise`);
+    }
+    return value;
+  },
+  then: <T, R>(value: SyncAsync<T>, cb: (value: T) => R | Promise<R>| SyncAsync<R>):
+            SyncAsync<R> => { return isPromise(value) ? value.then(cb) : cb(value);},
+  all: <T>(syncAsyncValues: SyncAsync<T>[]): SyncAsync<T[]> => {
+    return syncAsyncValues.some(isPromise) ? Promise.all(syncAsyncValues) : syncAsyncValues as T[];
+  }
 };
 
 export function noUndefined<T>(val: T | undefined): T {

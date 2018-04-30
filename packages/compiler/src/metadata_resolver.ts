@@ -23,6 +23,8 @@ import {getAllLifecycleHooks} from './lifecycle_reflector';
 
 export type ErrorCollector = (error: any, type?: any) => void;
 
+export const ERROR_COMPONENT_TYPE = 'ngComponentType';
+
 // Design notes:
 // - don't lazily create metadata:
 //   For some metadata, we need to do async work sometimes,

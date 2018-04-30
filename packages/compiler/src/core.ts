@@ -52,6 +52,12 @@ export interface Directive {
 export const createDirective =
     makeMetadataFactory<Directive>('Directive', (dir: Directive = {}) => dir);
 
+export interface Pipe {
+  name: string;
+  pure?: boolean;
+}
+export const createPipe = makeMetadataFactory<Pipe>('Pipe', (p: Pipe) => ({pure: true, ...p}));
+
 export interface Component extends Directive {
     changeDetection?: ChangeDetectionStrategy;
     viewProviders?: Provider[];
@@ -84,6 +90,15 @@ export enum MissingTranslationStrategy {
     Error = 0,
     Warning = 1,
     Ignore = 2,
+}
+
+export enum SecurityContext {
+  NONE = 0,
+  HTML = 1,
+  STYLE = 2,
+  SCRIPT = 3,
+  URL = 4,
+  RESOURCE_URL = 5,
 }
 
 export type Provider = any;
